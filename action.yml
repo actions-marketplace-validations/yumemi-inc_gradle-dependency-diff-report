@@ -27,6 +27,10 @@ inputs:
     description: ''
     required: false
     default: 'Report from Gradle Dependency Diff Report action'
+  repository: # for .github/workflows/ci.yml
+    description: ''
+    required: false
+    default: ${{ github.repository }}
 outputs:
   exists-diff:
     description: ''
@@ -38,7 +42,7 @@ runs:
       id: report
       shell: bash
       env:
-        REPOSITORY: ${{ github.repository }}
+        REPOSITORY: ${{ inputs.repository }}
         GH_TOKEN: ${{ github.token }}
         EVENT_NAME: ${{ github.event_name }}
         BEFORE_REF: ${{ inputs.before-ref }}
