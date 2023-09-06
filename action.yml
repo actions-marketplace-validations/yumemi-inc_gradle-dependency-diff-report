@@ -15,14 +15,6 @@ inputs:
     description: ''
     required: false
     default: '.'
-#  before-ref:
-#    description: ''
-#    required: false
-#    default: ${{ github.event.pull_request.base.sha || github.event.before }}
-#  after-ref:
-#    description: ''
-#    required: false
-#    default: ${{ github.event.pull_request.head.sha || github.event.after }}
   report-title:
     description: ''
     required: false
@@ -39,10 +31,6 @@ inputs:
     description: ''
     required: false
     default: ${{ github.event.after }}
-#  commit-count: # for .github/workflows/ci.yml
-#    description: ''
-#    required: false
-#    default: ${{ github.event.pull_request.commits || '0' }}
   pr-number: # for .github/workflows/ci.yml
     description: ''
     required: false
@@ -61,11 +49,8 @@ runs:
         REPOSITORY: ${{ inputs.repository }}
         GH_TOKEN: ${{ github.token }}
         EVENT_NAME: ${{ github.event_name }}
-#        BEFORE_REF: ${{ inputs.before-ref }}
-#        AFTER_REF: ${{ inputs.after-ref }}
         BEFORE_SHA: ${{ inputs.before-sha }}
         AFTER_SHA: ${{ inputs.after-sha }}
-#        COMMIT_COUNT: ${{ inputs.commit-count }}
         PR_NUMBER: ${{ inputs.pr-number }}
         MODULES: ${{ inputs.modules }}
         CONFIGURATION: ${{ inputs.configuration }}
@@ -127,28 +112,6 @@ runs:
 
         cd "./sources/$PROJECT_DIR"
 
-        # # if there is no permission, the above git clone fails
-        # before_sha="$("$WORK_DIR/get_valid_sha.sh" "$REPOSITORY" "$GH_TOKEN" "$BEFORE_REF")"
-        # after_sha="$("$WORK_DIR/get_valid_sha.sh" "$REPOSITORY" "$GH_TOKEN" "$AFTER_REF")"
-        # 
-        # if [[ -z "$before_sha" ]]; then
-        #   echo "::error::Incorrect 'before-ref' input. '$BEFORE_REF' is unknown reference."
-        #   exit 1
-        # fi
-        #
-        # if [[ -z "$after_sha" ]]; then
-        #   echo "::error::Incorrect 'after-ref' input. '$AFTER_REF' is unknown reference."
-        #   exit 1
-        # fi
-
-        after_sha="$AFTER_SHA"
-
-        git checkout -q "$after_sha"
-
-        for i in "${!modules[@]}" ; do
-          ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-after-deps.txt"
-        done
-
         if [[ "$EVENT_NAME" == 'push' ]]; then
           before_sha="$BEFORE_SHA"
         else
@@ -162,10 +125,18 @@ runs:
           before_sha="$(git rev-parse HEAD~1)"
         fi
 
+        after_sha="$AFTER_SHA"
+
         git checkout -q "$before_sha"
 
         for i in "${!modules[@]}" ; do
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-before-deps.txt"
+        done
+
+        git checkout -q "$after_sha"
+
+        for i in "${!modules[@]}" ; do
+          ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-after-deps.txt"
         done
 
         echo "## $REPORT_TITLE" >> $GITHUB_STEP_SUMMARY
