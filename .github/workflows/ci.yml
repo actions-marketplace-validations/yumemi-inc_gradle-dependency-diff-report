@@ -1,10 +1,6 @@
 name: CI
 
-on:
-  pull_request:
-  push:
-    branches:
-      - main
+on: push
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -31,11 +27,10 @@ jobs:
         id: report
         uses: ./
         with:
-          repository: 'android/sunflower'
           modules: 'app'
           configuration: 'releaseRuntimeClasspath'
+          repository: 'android/sunflower'
           before-sha: '13144ae9b1cb7a725dc846179cd8498058bafad2'
           after-sha: '8d000f6c72bc5384b4ca9f7452d620085919519d'
-          pr-number: 883
       - name: Show result
         run: echo '${{ steps.report.outputs.exists-diff }}'

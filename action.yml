@@ -31,10 +31,6 @@ inputs:
     description: ''
     required: false
     default: ${{ github.event.after }}
-  pr-number: # for .github/workflows/ci.yml
-    description: ''
-    required: false
-    default: ${{ github.event.pull_request.number }}
 outputs:
   exists-diff:
     description: ''
@@ -51,7 +47,7 @@ runs:
         EVENT_NAME: ${{ github.event_name }}
         BEFORE_SHA: ${{ inputs.before-sha }}
         AFTER_SHA: ${{ inputs.after-sha }}
-        PR_NUMBER: ${{ inputs.pr-number }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         MODULES: ${{ inputs.modules }}
         CONFIGURATION: ${{ inputs.configuration }}
         PROJECT_DIR: ${{ inputs.project-dir }}
