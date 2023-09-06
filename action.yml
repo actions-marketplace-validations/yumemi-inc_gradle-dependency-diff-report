@@ -156,7 +156,7 @@ runs:
           res="$(curl -f \
                       -X GET \
                       -H "Authorization: token $GH_TOKEN" \
-                      "https://api.github.com/repos/$repository/pulls/$PR_NUMBER/commits")"
+                      "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER/commits")"
           first_commit_sha="$(echo "$res" | tr -d '[:cntrl:]' | jq -r '.[0].sha')"
           git checkout -q "$first_commit_sha"
           before_sha="$(git rev-parse HEAD~1)"
