@@ -39,10 +39,14 @@ inputs:
     description: ''
     required: false
     default: ${{ github.event.after }}
-  commit-count: # for .github/workflows/ci.yml
+#  commit-count: # for .github/workflows/ci.yml
+#    description: ''
+#    required: false
+#    default: ${{ github.event.pull_request.commits || '0' }}
+  pr-number: # for .github/workflows/ci.yml
     description: ''
     required: false
-    default: ${{ github.event.pull_request.commits || '0' }}
+    default: ${{ github.event.pull_request.number }}
 outputs:
   exists-diff:
     description: ''
@@ -61,7 +65,8 @@ runs:
 #        AFTER_REF: ${{ inputs.after-ref }}
         BEFORE_SHA: ${{ inputs.before-sha }}
         AFTER_SHA: ${{ inputs.after-sha }}
-        COMMIT_COUNT: ${{ inputs.commit-count }}
+#        COMMIT_COUNT: ${{ inputs.commit-count }}
+        PR_NUMBER: ${{ inputs.pr-number }}
         MODULES: ${{ inputs.modules }}
         CONFIGURATION: ${{ inputs.configuration }}
         PROJECT_DIR: ${{ inputs.project-dir }}
@@ -147,7 +152,14 @@ runs:
         if [[ "$EVENT_NAME" == 'push' ]]; then
           before_sha="$BEFORE_SHA"
         else
-          before_sha="$(git rev-parse "HEAD~${COMMIT_COUNT}")"
+          # if there is no permission, the above git clone fails
+          res="$(curl -f \
+                      -X GET \
+                      -H "Authorization: token $GH_TOKEN" \
+                      "https://api.github.com/repos/$repository/pulls/$PR_NUMBER/commits")"
+          first_commit_sha="$(echo "$res" | tr -d '[:cntrl:]' | jq -r '.[0].sha')"
+          git checkout -q "$first_commit_sha"
+          before_sha="$(git rev-parse HEAD~1)"
         fi
 
         git checkout -q "$before_sha"
