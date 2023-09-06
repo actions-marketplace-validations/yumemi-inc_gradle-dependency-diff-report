@@ -34,7 +34,8 @@ jobs:
           repository: 'android/sunflower'
           modules: 'app'
           configuration: 'releaseRuntimeClasspath'
-          before-ref: '13144ae9b1cb7a725dc846179cd8498058bafad2'
-          after-ref: '8d000f6c72bc5384b4ca9f7452d620085919519d'
+          before-sha: '13144ae9b1cb7a725dc846179cd8498058bafad2'
+          after-sha: '8d000f6c72bc5384b4ca9f7452d620085919519d'
+          commit-count: 9
       - name: Show result
         run: echo '${{ steps.report.outputs.exists-diff }}'
