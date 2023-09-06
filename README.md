@@ -22,6 +22,7 @@ on: pull_request
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   report:

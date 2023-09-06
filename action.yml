@@ -15,14 +15,6 @@ inputs:
     description: ''
     required: false
     default: '.'
-  before-ref:
-    description: ''
-    required: false
-    default: ${{ github.event.pull_request.base.sha || github.event.before }}
-  after-ref:
-    description: ''
-    required: false
-    default: ${{ github.event.pull_request.head.sha || github.event.after }}
   report-title:
     description: ''
     required: false
@@ -31,6 +23,14 @@ inputs:
     description: ''
     required: false
     default: ${{ github.repository }}
+  before-sha: # for .github/workflows/ci.yml
+    description: ''
+    required: false
+    default: ${{ github.event.before }}
+  after-sha: # for .github/workflows/ci.yml
+    description: ''
+    required: false
+    default: ${{ github.event.after }}
 outputs:
   exists-diff:
     description: ''
@@ -45,8 +45,9 @@ runs:
         REPOSITORY: ${{ inputs.repository }}
         GH_TOKEN: ${{ github.token }}
         EVENT_NAME: ${{ github.event_name }}
-        BEFORE_REF: ${{ inputs.before-ref }}
-        AFTER_REF: ${{ inputs.after-ref }}
+        BEFORE_SHA: ${{ inputs.before-sha }}
+        AFTER_SHA: ${{ inputs.after-sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
         MODULES: ${{ inputs.modules }}
         CONFIGURATION: ${{ inputs.configuration }}
         PROJECT_DIR: ${{ inputs.project-dir }}
@@ -107,19 +108,20 @@ runs:
 
         cd "./sources/$PROJECT_DIR"
 
-        # if there is no permission, the above git clone fails
-        before_sha="$("$WORK_DIR/get_valid_sha.sh" "$REPOSITORY" "$GH_TOKEN" "$BEFORE_REF")"
-        after_sha="$("$WORK_DIR/get_valid_sha.sh" "$REPOSITORY" "$GH_TOKEN" "$AFTER_REF")"
-
-        if [[ -z "$before_sha" ]]; then
-          echo "::error::Incorrect 'before-ref' input. '$BEFORE_REF' is unknown reference."
-          exit 1
+        if [[ "$EVENT_NAME" == 'push' ]]; then
+          before_sha="$BEFORE_SHA"
+        else
+          # if there is no permission, the above git clone fails
+          res="$(curl -f \
+                      -X GET \
+                      -H "Authorization: token $GH_TOKEN" \
+                      "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER/commits")"
+          first_commit_sha="$(echo "$res" | tr -d '[:cntrl:]' | jq -r '.[0].sha')"
+          git checkout -q "$first_commit_sha"
+          before_sha="$(git rev-parse HEAD~1)"
         fi
 
-        if [[ -z "$after_sha" ]]; then
-          echo "::error::Incorrect 'after-ref' input. '$AFTER_REF' is unknown reference."
-          exit 1
-        fi
+        after_sha="$AFTER_SHA"
 
         git checkout -q "$before_sha"
 
