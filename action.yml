@@ -111,8 +111,7 @@ runs:
         if [[ "$EVENT_NAME" == 'push' ]]; then
           before_sha="$BEFORE_SHA"
         else
-          # if there is no permission, the above git clone fails
-          git checkout -q "$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')"
+          git checkout -q "$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
           before_sha="$(git rev-parse HEAD~1)"
         fi
 
