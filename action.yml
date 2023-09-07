@@ -112,12 +112,7 @@ runs:
           before_sha="$BEFORE_SHA"
         else
           # if there is no permission, the above git clone fails
-          res="$(curl -f \
-                      -X GET \
-                      -H "Authorization: token $GH_TOKEN" \
-                      "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER/commits")"
-          first_commit_sha="$(echo "$res" | tr -d '[:cntrl:]' | jq -r '.[0].sha')"
-          git checkout -q "$first_commit_sha"
+          git checkout -q "$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')"
           before_sha="$(git rev-parse HEAD~1)"
         fi
 
