@@ -135,7 +135,7 @@ runs:
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-after-deps.txt"
         done
 
-        echo "## $REPORT_TITLE" >> $GITHUB_STEP_SUMMARY
+        echo "### $REPORT_TITLE" >> $GITHUB_STEP_SUMMARY
         echo "- bofore commit SHA: \`${before_sha}\`" >> $GITHUB_STEP_SUMMARY
         echo "- after commit SHA: \`${after_sha}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -143,7 +143,7 @@ runs:
           result="$(java -jar "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" "$WORK_DIR/deps/${modules[$i]}-before-deps.txt" "$WORK_DIR/deps/${modules[$i]}-after-deps.txt")"
 
           echo '' >> $GITHUB_STEP_SUMMARY
-          echo "### \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
+          echo ":black_medium_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
 
           if [ -n "$result" ]; then
             echo 'exists-diff=true' >> $GITHUB_OUTPUT
