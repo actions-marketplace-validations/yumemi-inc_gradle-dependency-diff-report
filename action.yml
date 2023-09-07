@@ -18,7 +18,7 @@ inputs:
   report-title:
     description: ''
     required: false
-    default: 'Report from Gradle Dependency Diff Report action'
+    default: 'Report from [Gradle Dependency Diff Report](https://github.com/yumemi-inc/gradle-dependency-diff-report) action'
   repository: # for .github/workflows/ci.yml
     description: ''
     required: false
