@@ -136,6 +136,7 @@ runs:
         done
 
         echo "### $REPORT_TITLE" >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
         echo "- bofore commit SHA: \`${before_sha}\`" >> $GITHUB_STEP_SUMMARY
         echo "- after commit SHA: \`${after_sha}\`" >> $GITHUB_STEP_SUMMARY
 
@@ -143,17 +144,17 @@ runs:
           result="$(java -jar "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" "$WORK_DIR/deps/${modules[$i]}-before-deps.txt" "$WORK_DIR/deps/${modules[$i]}-after-deps.txt")"
 
           echo '' >> $GITHUB_STEP_SUMMARY
-          echo ":white_large_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
 
           if [ -n "$result" ]; then
-            echo 'exists-diff=true' >> $GITHUB_OUTPUT
-
+            echo ":orange_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "$result" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
 
             result_detail="$(java -jar "$WORK_DIR/tools/dependency-tree-diff.jar" "$WORK_DIR/deps/${modules[$i]}-before-deps.txt" "$WORK_DIR/deps/${modules[$i]}-after-deps.txt")"
 
+            echo '' >> $GITHUB_STEP_SUMMARY
             echo '<details>' >> $GITHUB_STEP_SUMMARY
             echo '<summary>detail</summary>' >> $GITHUB_STEP_SUMMARY
             echo '' >> $GITHUB_STEP_SUMMARY
@@ -161,7 +162,11 @@ runs:
             echo "$result_detail" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo '</details>' >> $GITHUB_STEP_SUMMARY
+
+            echo 'exists-diff=true' >> $GITHUB_OUTPUT
           else
+            echo ":green_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
             echo 'No difference in dependencies, when this module is checked as a base point.' >> $GITHUB_STEP_SUMMARY
           fi
         done
