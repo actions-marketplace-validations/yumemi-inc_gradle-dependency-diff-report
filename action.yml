@@ -54,8 +54,7 @@ runs:
         REPOSITORY: ${{ inputs.repository }}
         BEFORE_SHA: ${{ inputs.before-sha }}
         AFTER_SHA: ${{ inputs.after-sha }}
-        BEFORE_REF: ${{ github.base_ref }}
-        AFTER_REF: ${{ github.ref }}
+        MERGE_REF: ${{ github.ref }}
         EVENT_NAME: ${{ github.event_name }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GH_TOKEN: ${{ github.token }}
@@ -120,17 +119,16 @@ runs:
         git config http.https://github.com/.extraheader "AUTHORIZATION: basic $GITHUB_AUTH"
 
         if [[ "$EVENT_NAME" == 'push' ]]; then
-          before_sha="$BEFORE_SHA"
           after_sha="$AFTER_SHA"
+          before_sha="$BEFORE_SHA"
         elif [[ "$COMPARE_WITH_BASE" == 'false' ]]; then
+          after_sha="$AFTER_SHA"
           first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
           before_sha="$(git rev-parse "${first_commit}~1")"
-          after_sha="$AFTER_SHA"
         else
-          git fetch origin "$BEFORE_REF:before"
-          before_sha="$(git rev-parse before)"
-          git fetch origin "$AFTER_REF:after"
-          after_sha="$(git rev-parse after)"
+          git fetch origin "$MERGE_REF:merge"
+          after_sha="$(git rev-parse merge)"
+          before_sha="$(git rev-parse "${after_sha}~1")"
         fi
 
         git checkout -q "$before_sha"
