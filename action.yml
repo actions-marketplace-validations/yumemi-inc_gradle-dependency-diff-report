@@ -19,6 +19,10 @@ inputs:
     description: ''
     required: false
     default: 'Report from [Gradle Dependency Diff Report](https://github.com/yumemi-inc/gradle-dependency-diff-report) action'
+  compare-with-base:
+    description: ''
+    required: false
+    default: 'true'
   repository: # for .github/workflows/ci.yml
     description: ''
     required: false
@@ -42,16 +46,18 @@ runs:
       id: report
       shell: bash
       env:
-        REPOSITORY: ${{ inputs.repository }}
-        GH_TOKEN: ${{ github.token }}
-        EVENT_NAME: ${{ github.event_name }}
-        BEFORE_SHA: ${{ inputs.before-sha }}
-        AFTER_SHA: ${{ inputs.after-sha }}
-        PR_NUMBER: ${{ github.event.pull_request.number }}
         MODULES: ${{ inputs.modules }}
         CONFIGURATION: ${{ inputs.configuration }}
         PROJECT_DIR: ${{ inputs.project-dir }}
         REPORT_TITLE: ${{ inputs.report-title }}
+        COMPARE_WITH_BASE: ${{ inputs.compare-with-base }}
+        REPOSITORY: ${{ inputs.repository }}
+        BEFORE_SHA: ${{ inputs.before-sha }}
+        AFTER_SHA: ${{ inputs.after-sha }}
+        MERGE_REF: ${{ github.ref }}
+        EVENT_NAME: ${{ github.event_name }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         if [[ "$EVENT_NAME" != 'pull_request' && "$EVENT_NAME" != 'push' ]]; then
           echo "::error::This action must be triggered by a 'pull_request' or 'push' event."
@@ -92,14 +98,14 @@ runs:
 
         curl -f -L -o "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" 'https://github.com/careem/dependency-diff-tldr/releases/download/v0.0.6/dependency-diff-tldr-r8.jar'
 
-        if [ 'b76af4e71fe1bc3362207d648542337c21ab91e8' != "$(shasum "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" | awk '{print $1}')" ]; then
+        if [[ 'b76af4e71fe1bc3362207d648542337c21ab91e8' != "$(shasum "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" | awk '{print $1}')" ]]; then
           echo '::error::Incorrect checksum for dependency-diff-tldr-r8.jar.'
           exit 1
         fi
 
         curl -f -L -o "$WORK_DIR/tools/dependency-tree-diff.jar" 'https://github.com/JakeWharton/dependency-tree-diff/releases/download/1.2.0/dependency-tree-diff.jar'
 
-        if [ '949394274f37c06ac695b5d49860513e4d16e847' != "$(shasum "$WORK_DIR/tools/dependency-tree-diff.jar" | awk '{print $1}')" ]; then
+        if [[ '949394274f37c06ac695b5d49860513e4d16e847' != "$(shasum "$WORK_DIR/tools/dependency-tree-diff.jar" | awk '{print $1}')" ]]; then
           echo '::error::Incorrect checksum for dependency-tree-diff.jar.'
           exit 1
         fi
@@ -108,14 +114,22 @@ runs:
 
         cd "./sources/$PROJECT_DIR"
 
+        # enable fetch
+        GITHUB_AUTH="$(echo -n "x-access-token:$GH_TOKEN" | base64)"
+        git config http.https://github.com/.extraheader "AUTHORIZATION: basic $GITHUB_AUTH"
+
         if [[ "$EVENT_NAME" == 'push' ]]; then
+          after_sha="$AFTER_SHA"
           before_sha="$BEFORE_SHA"
-        else
+        elif [[ "$COMPARE_WITH_BASE" == 'false' ]]; then
+          after_sha="$AFTER_SHA"
           first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
           before_sha="$(git rev-parse "${first_commit}~1")"
+        else
+          git fetch origin "$MERGE_REF:merge"
+          after_sha="$(git rev-parse merge)"
+          before_sha="$(git rev-parse "${after_sha}~1")"
         fi
-
-        after_sha="$AFTER_SHA"
 
         git checkout -q "$before_sha"
 
@@ -139,7 +153,7 @@ runs:
 
           echo '' >> $GITHUB_STEP_SUMMARY
 
-          if [ -n "$result" ]; then
+          if [[ -n "$result" ]]; then
             echo ":orange_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
             echo '' >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
