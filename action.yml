@@ -111,19 +111,19 @@ runs:
         if [[ "$EVENT_NAME" == 'push' ]]; then
           before_sha="$BEFORE_SHA"
         else
-          git checkout -q "$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
-          before_sha="$(git rev-parse HEAD~1)"
+          first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
+          before_sha="$(git rev-parse "${first_commit}~1")"
         fi
 
         after_sha="$AFTER_SHA"
 
-        git checkout -q "$before_sha" > /dev/null 2>&1 || { echo '::debug::Unable to check out before SHA.'; exit 1; }
+        git checkout -q "$before_sha"
 
         for i in "${!modules[@]}" ; do
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-before-deps.txt"
         done
 
-        git checkout -q "$after_sha" > /dev/null 2>&1 || { echo '::debug::Unable to check out after SHA.'; exit 1; }
+        git checkout -q "$after_sha"
 
         for i in "${!modules[@]}" ; do
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-after-deps.txt"
