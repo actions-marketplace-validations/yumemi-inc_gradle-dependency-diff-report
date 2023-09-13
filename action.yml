@@ -30,7 +30,7 @@ inputs:
   after-sha: # for .github/workflows/ci.yml
     description: ''
     required: false
-    default: ${{ github.event.after }}
+    default: ${{ github.event.pull_request.head.sha || github.event.after }}
 outputs:
   exists-diff:
     description: ''
