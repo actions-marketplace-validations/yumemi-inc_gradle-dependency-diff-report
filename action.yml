@@ -115,6 +115,7 @@ runs:
         cd "./sources/$PROJECT_DIR"
 
         # enable fetch
+        # ref: https://github.com/actions/checkout/blob/72f2cec99f417b1a1c5e2e88945068983b7965f9/src/git-auth-helper.ts#L55-L63
         GITHUB_AUTH="$(echo -n "x-access-token:$GH_TOKEN" | base64)"
         git config http.https://github.com/.extraheader "AUTHORIZATION: basic $GITHUB_AUTH"
 
