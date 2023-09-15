@@ -31,7 +31,7 @@ Reports are created with Gradle `dependencies` task, [dependency-diff-tldr](http
 
 ## Usage
 
-See [action.yml](blob/main/action.yml) for available action inputs and outputs.
+See [action.yml](action.yml) for available action inputs and outputs.
 Also, this action requires `contents: read` and `pull-requests: read` permissions.
 
 ### Specify multiple modules
