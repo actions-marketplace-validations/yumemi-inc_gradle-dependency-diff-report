@@ -6,21 +6,21 @@ branding:
   color: 'blue'
 inputs:
   modules:
-    description: ''
+    description: 'Target Gradle modules separated by spaces.'
     required: true
   configuration:
-    description: ''
+    description: 'Configuration of Gradle dependencies task.'
     required: false
   project-dir:
-    description: ''
+    description: 'Root directory of the target application under the repository.'
     required: false
     default: '.'
   report-title:
-    description: ''
+    description: 'Report title in job summary.'
     required: false
     default: 'Report from [Gradle Dependency Diff Report](https://github.com/yumemi-inc/gradle-dependency-diff-report) action'
   compare-with-base:
-    description: ''
+    description: 'Whether to compare with the base branch.'
     required: false
     default: 'true'
   repository: # for .github/workflows/ci.yml
@@ -37,7 +37,7 @@ inputs:
     default: ${{ github.event.pull_request.head.sha || github.event.after }}
 outputs:
   exists-diff:
-    description: ''
+    description: 'Whether there was any difference in dependencies.'
     value: ${{ steps.report.outputs.exists-diff || 'false' }}
 runs:
   using: 'composite'
