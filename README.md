@@ -123,7 +123,6 @@ This action uses Gradle `dependencies` task, so you can expect faster processing
 ```yaml
 - uses: gradle/gradle-build-action@v2
 - uses: yumemi-inc/gradle-dependency-diff-report@main
-  id: report
   with:
     modules: 'app'
     configuration: 'releaseRuntimeClasspath'
