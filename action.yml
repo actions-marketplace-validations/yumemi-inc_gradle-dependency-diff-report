@@ -18,7 +18,7 @@ inputs:
   report-title:
     description: 'Report title in job summary.'
     required: false
-    default: 'Report from [Gradle Dependency Diff Report](https://github.com/yumemi-inc/gradle-dependency-diff-report) action'
+    default: 'Report from Gradle Dependency Diff Report action'
   compare-with-base:
     description: 'Whether to compare with the base branch.'
     required: false
