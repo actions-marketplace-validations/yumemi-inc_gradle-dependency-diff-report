@@ -32,11 +32,12 @@ Reports are created with Gradle `dependencies` task, [dependency-diff-tldr](http
 ## Usage
 
 See [action.yml](action.yml) for available action inputs and outputs.
-Also, this action requires `contents: read` and `pull-requests: read` permissions.
+Note that this action requires `contents: read` and `pull-requests: read` permissions.
 
-### Specify multiple modules
+### Specifying multiple modules
 
-Basically, if you specify only the root module of the application, the modules that root depends on will also be reported, but if there are multiple root modules or if you need to report on individual modules, specify them separated by spaces.
+If you specify only the root module of the application, the modules that root depends on will also be reported.
+But if there is no root module or if you need to report on individual modules, specify them separated by spaces.
 
 ```yaml
 - uses: yumemi-inc/gradle-dependency-diff-report@main
@@ -54,7 +55,7 @@ At this time, if you want to apply a different configuration, specify it separat
     configuration: 'releaseRuntimeClasspath'
 ```
 
-### Specify java version
+### Specifying the Java version
 
 If not specified, the default version of the runner will be applied.
 For `ubuntu-22.04` it is `11`.
@@ -69,4 +70,30 @@ If you want to use a different version, specify it using [actions/setup-java](ht
   with:
     modules: 'app'
     configuration: 'releaseRuntimeClasspath'
+```
+### Don't consider base branch
+
+By default, the latest code in the base branch of a pull request is considered.
+To report dependency differences only in pull requests without considering the base branch, set `compare-with-base` input to `false`.
+
+```yaml
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+    compare-with-base: false
+```
+
+## Tips
+
+### Report only when library changes
+
+Run the workflow only when the file containing the library version changes.
+
+```
+on:
+  pull_request:
+    paths:
+      - '**/*.gradle*'
+      - '**/libs.versions.toml
 ```
