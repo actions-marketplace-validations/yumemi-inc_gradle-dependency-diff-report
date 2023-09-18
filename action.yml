@@ -146,8 +146,8 @@ runs:
 
         echo "### $REPORT_TITLE" >> $GITHUB_STEP_SUMMARY
         echo '' >> $GITHUB_STEP_SUMMARY
-        echo "- bofore commit SHA: \`${before_sha}\`" >> $GITHUB_STEP_SUMMARY
-        echo "- after commit SHA: \`${after_sha}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- commit SHA before change: [${before_sha}](https://github.com/${REPOSITORY}/commit/${before_sha})" >> $GITHUB_STEP_SUMMARY
+        echo "- commit SHA after change: [${after_sha}](https://github.com/${REPOSITORY}/commit/${after_sha})" >> $GITHUB_STEP_SUMMARY
 
         for i in "${!modules[@]}" ; do
           result="$(java -jar "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" "$WORK_DIR/deps/${modules[$i]}-before-deps.txt" "$WORK_DIR/deps/${modules[$i]}-after-deps.txt")"
