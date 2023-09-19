@@ -86,7 +86,7 @@ To report dependency differences only in pull requests without considering the b
 
 ### Specifying the application root directory
 
-If there is no application root directory directly under the repository, specify it with `project-dir` input.
+If the repository root directory and application root directory do not match, specify it with `project-dir` input.
 
 ```yaml
 - uses: yumemi-inc/gradle-dependency-diff-report@main
