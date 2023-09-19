@@ -95,7 +95,7 @@ on:
   pull_request:
     paths:
       - '**/*.gradle*'
-      - '**/libs.versions.toml
+      - '**/libs.versions.toml'
 ```
 
 ### Using this action's output
@@ -143,7 +143,7 @@ on:
       - 'main'
     paths:
       - '**/*.gradle*'
-      - '**/libs.versions.toml
+      - '**/libs.versions.toml'
 ```
 
 ### Process multiple modules in parallel
@@ -153,10 +153,10 @@ By processing multiple modules in parallel with multiple jobs, waiting time can 
 ```yaml
 jobs:
   report-group-a:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
-    runs-on: ubuntu-latest
     outputs:
       exists-diff: ${{ steps.report.outputs.exists-diff }}
     steps:
@@ -166,10 +166,10 @@ jobs:
           modules: 'app domain'
           configuration: 'releaseRuntimeClasspath'
   report-group-b:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
-    runs-on: ubuntu-latest
     outputs:
       exists-diff: ${{ steps.report.outputs.exists-diff }}
     steps:
@@ -181,9 +181,9 @@ jobs:
   comment-on-pull-request:
     if: contains(needs.*.outputs.exists-diff, 'true')
     needs: [report-group-a, report-group-b]
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    runs-on: ubuntu-latest
     steps:
       - uses: marocchino/sticky-pull-request-comment@v2
       ...
