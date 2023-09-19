@@ -3,7 +3,7 @@
 # [BETA] Gradle Dependency Diff Report
 
 A GitHub Action that reports Gradle dependency differences.
-The report is displayed in the pull request job summary, like [this](https://github.com/yumemi-inc/gradle-dependency-diff-report/actions/runs/6195029024).
+The report is displayed in the pull request job summary, like [this](https://github.com/yumemi-inc/gradle-dependency-diff-report/actions/runs/6220601823).
 
 At a minimum, you can simply implement a workflow as follows:
 
@@ -84,16 +84,119 @@ To report dependency differences only in pull requests without considering the b
     compare-with-base: false
 ```
 
+### Specifying the application root directory
+
+If the repository root directory and application root directory do not match, specify it with `project-dir` input.
+
+```yaml
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+    project-dir: 'my-app'
+```
+
 ## Tips
 
 ### Report only when library changes
 
-Run the workflow only when the file containing the library version changes.
+To prevent unnecessary workflow runs, run only when the file that contains the library version is changed.
 
-```
+```yaml
 on:
   pull_request:
     paths:
       - '**/*.gradle*'
-      - '**/libs.versions.toml
+      - '**/libs.versions.toml'
+```
+
+### Using this action's output
+
+Use the `exists-diff` output of this action to notify the pull request with a comment if there are any differences in dependencies.
+
+```yaml
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  id: report
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+- if: steps.report.outputs.exists-diff == 'true'
+  uses: marocchino/sticky-pull-request-comment@v2 # Note: requires 'pull-requests: write' permission
+  with:
+    header: dependency-diff
+    number: ${{ github.event.pull_request.number }}
+    message: ':warning: There are differences in dependencies. See details [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).'
+```
+
+### Using Gradle cache
+
+This action uses Gradle `dependencies` task, so you can expect faster processing by using Gradle cache.
+
+```yaml
+- uses: gradle/gradle-build-action@v2
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+```
+
+> [!NOTE]  
+> Since [gradle/gradle-build-action](https://github.com/gradle/gradle-build-action#using-the-cache-read-only) does not generate a cache in the HEAD branch of a pull request, in order to use the cache in a pull request, you must first generate a cache in the default branch with another workflow or something.
+
+### Triggered by push event
+
+This action can be triggered not only by `pull_request` events but also by `push` events.
+In this case, the difference from the previous commit.
+
+```yaml
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '**/*.gradle*'
+      - '**/libs.versions.toml'
+```
+
+### Process multiple modules in parallel
+
+By processing multiple modules in parallel with multiple jobs, waiting time can be expected to be reduced.
+
+```yaml
+jobs:
+  report-group-a:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      exists-diff: ${{ steps.report.outputs.exists-diff }}
+    steps:
+      - uses: yumemi-inc/gradle-dependency-diff-report@main
+        id: report
+        with:
+          modules: 'app domain'
+          configuration: 'releaseRuntimeClasspath'
+  report-group-b:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      exists-diff: ${{ steps.report.outputs.exists-diff }}
+    steps:
+      - uses: yumemi-inc/gradle-dependency-diff-report@main
+        id: report
+        with:
+          modules: 'feature:main feature:login'
+          configuration: 'releaseRuntimeClasspath'
+  comment-on-pull-request:
+    if: contains(needs.*.outputs.exists-diff, 'true')
+    needs: [report-group-a, report-group-b]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: marocchino/sticky-pull-request-comment@v2
+      ...
 ```

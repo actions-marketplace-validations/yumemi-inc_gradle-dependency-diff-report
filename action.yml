@@ -37,12 +37,12 @@ inputs:
     default: ${{ github.event.pull_request.head.sha || github.event.after }}
 outputs:
   exists-diff:
-    description: 'Whether there was any difference in dependencies.'
+    description: 'Whether there are any differences in dependencies.'
     value: ${{ steps.report.outputs.exists-diff || 'false' }}
 runs:
   using: 'composite'
   steps:
-    - name: Check and report differences
+    - name: Report dependency differences
       id: report
       shell: bash
       env:
@@ -176,6 +176,6 @@ runs:
           else
             echo ":green_square: \`${modules[$i]}\` module ( \`${configurations[$i]}\` configuration )" >> $GITHUB_STEP_SUMMARY
             echo '' >> $GITHUB_STEP_SUMMARY
-            echo 'No difference in dependencies, when this module is checked as a base point.' >> $GITHUB_STEP_SUMMARY
+            echo 'No differences in dependencies, when this module is the base point.' >> $GITHUB_STEP_SUMMARY
           fi
         done
