@@ -141,4 +141,50 @@ on:
   push:
     branches:
       - 'main'
+    paths:
+      - '**/*.gradle*'
+      - '**/libs.versions.toml
+```
+
+### Process multiple modules in parallel
+
+By processing multiple modules in parallel with multiple jobs, waiting time can be expected to be reduced.
+
+```yaml
+jobs:
+  report-group-a:
+    permissions:
+      contents: read
+      pull-requests: read
+    runs-on: ubuntu-latest
+    outputs:
+      exists-diff: ${{ steps.report.outputs.exists-diff }}
+    steps:
+      - uses: yumemi-inc/gradle-dependency-diff-report@main
+        id: report
+        with:
+          modules: 'app domain'
+          configuration: 'releaseRuntimeClasspath'
+  report-group-b:
+    permissions:
+      contents: read
+      pull-requests: read
+    runs-on: ubuntu-latest
+    outputs:
+      exists-diff: ${{ steps.report.outputs.exists-diff }}
+    steps:
+      - uses: yumemi-inc/gradle-dependency-diff-report@main
+        id: report
+        with:
+          modules: 'feature:main feature:login'
+          configuration: 'releaseRuntimeClasspath'
+  comment-on-pull-request:
+    if: contains(needs.*.outputs.exists-diff, 'true')
+    needs: [report-group-a, report-group-b]
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: marocchino/sticky-pull-request-comment@v2
+      ...
 ```
