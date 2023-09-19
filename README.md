@@ -100,7 +100,7 @@ on:
 
 ### Using this action's output
 
-Use the `exists-diff` output of this action to notify the pull request with a comment if there are any difference in dependencies.
+Use the `exists-diff` output of this action to notify the pull request with a comment if there are any differences in dependencies.
 
 ```yaml
 - uses: yumemi-inc/gradle-dependency-diff-report@main
@@ -130,3 +130,15 @@ This action uses Gradle `dependencies` task, so you can expect faster processing
 
 > [!NOTE]  
 > Since [gradle/gradle-build-action](https://github.com/gradle/gradle-build-action#using-the-cache-read-only) does not generate a cache in the HEAD branch of a pull request, in order to use the cache in a pull request, you must first generate a cache in the default branch with another workflow or something.
+
+### Triggered by push event
+
+This action can be triggered not only by `pull_request` events but also by `push` events.
+In this case, the difference from the previous commit.
+
+```yaml
+on:
+  push:
+    branches:
+      - 'main'
+```
