@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
     steps:
       - uses: yumemi-inc/gradle-dependency-diff-report@main
         with:
@@ -32,7 +31,7 @@ Reports are created with Gradle `dependencies` task, [dependency-diff-tldr](http
 ## Usage
 
 See [action.yml](action.yml) for available action inputs and outputs.
-Note that this action requires `contents: read` and `pull-requests: read` permissions.
+Note that this action requires `contents: read` permission.
 
 ### Specifying multiple modules
 
@@ -83,6 +82,7 @@ To report dependency differences only in pull requests without considering the b
     configuration: 'releaseRuntimeClasspath'
     compare-with-base: false
 ```
+Note that `pull-requests: read` permission is required in this case.
 
 ### Specifying the application root directory
 
@@ -168,7 +168,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
     outputs:
       exists-diff: ${{ steps.report.outputs.exists-diff }}
     steps:
@@ -181,7 +180,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
     outputs:
       exists-diff: ${{ steps.report.outputs.exists-diff }}
     steps:
