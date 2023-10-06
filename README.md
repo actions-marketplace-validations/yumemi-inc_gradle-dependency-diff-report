@@ -12,8 +12,6 @@ name: Dependency Diff Report
 
 on: pull_request
 
-permissions: {}
-
 jobs:
   report:
     runs-on: ubuntu-latest
@@ -197,4 +195,18 @@ jobs:
     steps:
       - uses: marocchino/sticky-pull-request-comment@v2
       ...
+```
+
+### Pass environment variables
+
+If you want to pass some environment variables when running your application's `dependencies` task, specify them with `env`.
+
+```
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+  env:
+    YOUR_ENV_1: ...
+    YOUR_ENV_2: ...
 ```
