@@ -201,7 +201,7 @@ jobs:
 
 If you want to pass some environment variables when running your application's `dependencies` task, specify them with `env`.
 
-```
+```yaml
 - uses: yumemi-inc/gradle-dependency-diff-report@main
   with:
     modules: 'app'
