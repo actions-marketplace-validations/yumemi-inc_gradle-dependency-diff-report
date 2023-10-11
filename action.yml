@@ -126,7 +126,7 @@ runs:
           first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|.[0].oid')"
           before_sha="$(git rev-parse "${first_commit}~1")"
         else
-          git fetch origin "$MERGE_REF:merge"
+          git fetch -q origin "$MERGE_REF:merge"
           after_sha="$(git rev-parse merge)"
           before_sha="$(git rev-parse "${after_sha}~1")"
         fi
