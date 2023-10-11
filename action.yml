@@ -133,7 +133,7 @@ runs:
 
         git checkout -q "$before_sha"
         eval "$SCRIPT"
-        cd "$WORK_DIR/sources/$PROJECT_DIR"
+        cd "$WORK_DIR/sources/$PROJECT_DIR" # directory may have changed in the script
 
         for i in "${!modules[@]}" ; do
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-before-deps.txt"
@@ -147,7 +147,7 @@ runs:
 
         git checkout -q "$after_sha"
         eval "$SCRIPT"
-        cd "$WORK_DIR/sources/$PROJECT_DIR"
+        cd "$WORK_DIR/sources/$PROJECT_DIR" # directory may have changed in the script
 
         for i in "${!modules[@]}" ; do
           ./gradlew ":${modules[$i]}:dependencies" --configuration "${configurations[$i]}" > "$WORK_DIR/deps/${modules[$i]}-after-deps.txt"
