@@ -23,18 +23,14 @@ inputs:
     description: 'Whether to compare with the base branch.'
     required: false
     default: 'true'
-  repository: # for .github/workflows/ci.yml
+  repository: # opned for .github/workflows/ci.yml
     description: ''
     required: false
     default: ${{ github.repository }}
-  before-sha: # for .github/workflows/ci.yml
+  sha: # opend for .github/workflows/ci.yml
     description: ''
     required: false
-    default: ${{ github.event.before }}
-  after-sha: # for .github/workflows/ci.yml
-    description: ''
-    required: false
-    default: ${{ github.event.pull_request.head.sha || github.event.after }}
+    default: ${{ github.sha }}
 outputs:
   exists-diff:
     description: 'Whether there are any differences in dependencies.'
@@ -52,8 +48,7 @@ runs:
         REPORT_TITLE: ${{ inputs.report-title }}
         COMPARE_WITH_BASE: ${{ inputs.compare-with-base }}
         REPOSITORY: ${{ inputs.repository }}
-        BEFORE_SHA: ${{ inputs.before-sha }}
-        AFTER_SHA: ${{ inputs.after-sha }}
+        SHA: ${{ inputs.sha }}
         MERGE_REF: ${{ github.ref }}
         EVENT_NAME: ${{ github.event_name }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -120,11 +115,12 @@ runs:
         git config http.https://github.com/.extraheader "AUTHORIZATION: basic $GITHUB_AUTH"
 
         if [[ "$EVENT_NAME" == 'push' ]]; then
-          after_sha="$AFTER_SHA"
-          before_sha="$BEFORE_SHA"
+          after_sha="$SHA"
+          before_sha="$(git rev-parse "${after_sha}~1")"
         elif [[ "$COMPARE_WITH_BASE" == 'false' ]]; then
-          after_sha="$AFTER_SHA"
-          first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
+          last_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|reverse|.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
+          after_sha="$last_commit"
+          first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|.[0].oid')"
           before_sha="$(git rev-parse "${first_commit}~1")"
         else
           git fetch origin "$MERGE_REF:merge"
