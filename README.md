@@ -210,3 +210,29 @@ If you want to pass some environment variables when running your application's `
     YOUR_ENV_1: ...
     YOUR_ENV_2: ...
 ```
+
+### Run bash script
+
+If you want to do some processing before your application's `dependencies` task, specify it with `script` input.
+
+```yaml
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+    script: |
+      cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+      ...
+```
+
+At this time, environment variables and `${{ }}` expressions can be used.
+
+```yaml
+- uses: yumemi-inc/gradle-dependency-diff-report@main
+  with:
+    modules: 'app'
+    configuration: 'releaseRuntimeClasspath'
+    script: |
+      echo $GITHUB_REF
+      echo ${{ github.actor }}
+```
