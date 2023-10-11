@@ -140,7 +140,10 @@ runs:
         done
 
         cd "$WORK_DIR/sources"
+
+        # cleanup
         git clean -df -q
+        git checkout -q .
 
         git status
 
