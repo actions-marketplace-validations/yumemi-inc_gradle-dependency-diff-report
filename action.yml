@@ -145,8 +145,6 @@ runs:
         git clean -df -q
         git checkout -q .
 
-        git status
-
         git checkout -q "$after_sha"
         eval "$SCRIPT"
         cd "$WORK_DIR/sources/$PROJECT_DIR"
