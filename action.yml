@@ -140,6 +140,7 @@ runs:
         done
 
         cd "$WORK_DIR/sources"
+        git clean -df -q
         git checkout -q "$after_sha"
         eval "$SCRIPT"
         cd "$WORK_DIR/sources/$PROJECT_DIR"
