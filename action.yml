@@ -2,7 +2,7 @@ name: 'Gradle Dependency Diff Report'
 description: 'A GitHub Action that reports Gradle dependency differences.'
 author: 'YUMEMI Inc.'
 branding:
-  icon: 'git-pull-request'
+  icon: 'info'
   color: 'blue'
 inputs:
   modules:
