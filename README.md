@@ -236,3 +236,7 @@ At this time, environment variables and `${{ }}` expressions can be used.
       echo $GITHUB_REF
       echo ${{ github.actor }}
 ```
+
+## Reference
+
+- (Japanese) [CI でライブラリのバージョンの変化をレポートする](https://speakerdeck.com/hkusu/ci-teraihurarinohasiyonnobian-hua-worehotosuru)
