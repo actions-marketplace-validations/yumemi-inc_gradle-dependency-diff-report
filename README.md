@@ -119,11 +119,10 @@ Use the `exists-diff` output of this action to notify the pull request with a co
     modules: 'app'
     configuration: 'releaseRuntimeClasspath'
 - if: steps.report.outputs.exists-diff == 'true'
-  uses: marocchino/sticky-pull-request-comment@v2 # Note: requires 'pull-requests: write' permission
+  uses: yumemi-inc/comment-pull-request@v1 # Note: requires 'pull-requests: write' permission
   with:
-    header: dependency-diff
-    number: ${{ github.event.pull_request.number }}
-    message: ':warning: There are differences in dependencies. See details [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).'
+    comment: |
+      :warning: There are differences in dependencies. See details [here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 ```
 
 ### Using Gradle cache
@@ -193,7 +192,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: yumemi-inc/comment-pull-request@v1
       ...
 ```
 
