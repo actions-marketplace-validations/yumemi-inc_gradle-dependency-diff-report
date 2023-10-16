@@ -1,4 +1,4 @@
-name: 'Gradle Dependency Diff Report'
+name: 'Gradle Dependency Diff Report action'
 description: 'A GitHub Action that reports Gradle dependency differences.'
 author: 'YUMEMI Inc.'
 branding:
@@ -58,15 +58,14 @@ runs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         GH_TOKEN: ${{ github.token }}
       run: |
-        if [[ "$EVENT_NAME" != 'pull_request' && "$EVENT_NAME" != 'push' ]]; then
-          echo "::error::This action must be triggered by a 'pull_request' or 'push' event."
-          exit 1
-        fi
+        function raise_error() {
+          echo "::error::$1"
+          return 1
+        }
 
-        if [[ -z "$MODULES" ]]; then
-          echo "::error::Specify 'modules' input."
-          exit 1
-        fi
+        if [[ "$EVENT_NAME" != 'pull_request' && "$EVENT_NAME" != 'push' ]]; then raise_error "This action must be triggered by a 'pull_request' or 'push' event."; fi
+
+        if [[ -z "$MODULES" ]]; then raise_error "Specify 'modules' input."; fi
 
         modules=()
         configurations=()
@@ -79,10 +78,7 @@ runs:
             module=${module%%|*}
           fi
 
-          if [[ -z "$module" || -z "$configuration" ]]; then
-            echo "::error::Incorrect 'modules' or 'configuration' input."
-            exit 1
-          fi
+          if [[ -z "$module" || -z "$configuration" ]]; then raise_error "Incorrect 'modules' or 'configuration' input."; fi
 
           modules+=($module)
           configurations+=($configuration)
@@ -98,18 +94,16 @@ runs:
         curl -f -L -o "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" 'https://github.com/careem/dependency-diff-tldr/releases/download/v0.0.6/dependency-diff-tldr-r8.jar'
 
         if [[ 'b76af4e71fe1bc3362207d648542337c21ab91e8' != "$(shasum "$WORK_DIR/tools/dependency-diff-tldr-r8.jar" | awk '{print $1}')" ]]; then
-          echo '::error::Incorrect checksum for dependency-diff-tldr-r8.jar.'
-          exit 1
+          raise_error "Incorrect checksum for dependency-diff-tldr-r8.jar."
         fi
 
         curl -f -L -o "$WORK_DIR/tools/dependency-tree-diff.jar" 'https://github.com/JakeWharton/dependency-tree-diff/releases/download/1.2.0/dependency-tree-diff.jar'
 
         if [[ '949394274f37c06ac695b5d49860513e4d16e847' != "$(shasum "$WORK_DIR/tools/dependency-tree-diff.jar" | awk '{print $1}')" ]]; then
-          echo '::error::Incorrect checksum for dependency-tree-diff.jar.'
-          exit 1
+          raise_error "Incorrect checksum for dependency-tree-diff.jar."
         fi
 
-        gh repo clone "$REPOSITORY" sources > /dev/null 2>&1 || { echo "::error::May not have 'contents: read' permission."; exit 1; }
+        gh repo clone "$REPOSITORY" sources > /dev/null 2>&1 || raise_error "May not have 'contents: read' permission."
         cd ./sources
 
         # enable fetch
@@ -121,7 +115,7 @@ runs:
           after_sha="$SHA"
           before_sha="$(git rev-parse "${after_sha}~1")"
         elif [[ "$COMPARE_WITH_BASE" == 'false' ]]; then
-          last_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|reverse|.[0].oid')" > /dev/null 2>&1 || { echo "::error::May not have 'pull-requests: read' permission."; exit 1; }
+          last_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|reverse|.[0].oid')" > /dev/null 2>&1 || raise_error "May not have 'pull-requests: read' permission."
           after_sha="$last_commit"
           first_commit="$(gh pr view "$PR_NUMBER" --json commits --jq '.commits|.[0].oid')"
           before_sha="$(git rev-parse "${first_commit}~1")"
