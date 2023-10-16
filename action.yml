@@ -1,4 +1,4 @@
-name: 'Gradle Dependency Diff Report'
+name: 'Gradle Dependency Diff Report action'
 description: 'A GitHub Action that reports Gradle dependency differences.'
 author: 'YUMEMI Inc.'
 branding:
